@@ -91,7 +91,32 @@
 - [ ] Créer un docker-compose.yml pour le développement local
 - [ ] Tester le build et l'exécution du conteneur Docker
 
-## 11. Kubernetes et Helm
+## 11. Infrastructure as Code avec Terraform
+
+- [ ] Installer et configurer Terraform
+- [ ] Créer la structure de base des fichiers Terraform
+  - [ ] main.tf
+  - [ ] variables.tf
+  - [ ] outputs.tf
+  - [ ] versions.tf
+- [ ] Configurer le backend Terraform (par exemple, S3 pour le stockage de l'état)
+- [ ] Définir les modules Terraform pour chaque composant majeur
+  - [ ] Module VPC
+  - [ ] Module EKS
+  - [ ] Module RDS (si nécessaire)
+  - [ ] Module ECR
+- [ ] Implémenter la création du VPC et des sous-réseaux
+- [ ] Configurer les groupes de sécurité nécessaires
+- [ ] Définir le cluster EKS avec Terraform
+- [ ] Configurer les groupes de nœuds EKS
+- [ ] Mettre en place les rôles IAM nécessaires
+- [ ] Créer les repositories ECR pour les images Docker
+- [ ] Configurer les ressources de monitoring (CloudWatch, Prometheus, Grafana)
+- [ ] Mettre en place des workspaces Terraform pour différents environnements
+- [ ] Implémenter des politiques de balisage cohérentes
+- [ ] Configurer les alertes de coûts AWS
+
+## 12. Kubernetes et Helm
 
 - [ ] Installer et configurer Helm
 - [ ] Créer un chart Helm pour le bot Discord
@@ -109,34 +134,35 @@
 - [ ] Créer des profils de valeurs pour différents environnements (dev, staging, prod)
 - [ ] Implémenter des hooks Helm pour les tâches pre/post déploiement
 - [ ] Configurer la gestion des dépendances dans Helm (si nécessaire)
+- [ ] Configurer Helm pour travailler avec l'EKS provisionné par Terraform
 
-## 12. AWS
+## 13. Intégration AWS et Terraform
 
-- [ ] Créer un compte AWS (si ce n'est pas déjà fait)
-- [ ] Configurer le VPC et les sous-réseaux
-- [ ] Mettre en place un cluster EKS (Elastic Kubernetes Service)
-  - [ ] Configurer les groupes de nœuds
-  - [ ] Mettre en place le contrôle d'accès basé sur les rôles (RBAC)
-- [ ] Configurer AWS ECR (Elastic Container Registry)
-  - [ ] Créer un repository pour l'image Docker du bot
-- [ ] Configurer Helm pour travailler avec EKS
-  - [ ] Installer Tiller (si utilisation de Helm v2) de manière sécurisée sur EKS
-  - [ ] Configurer les permissions nécessaires pour Helm sur EKS
+- [ ] Configurer les credentials AWS pour Terraform
+- [ ] Tester le provisionnement de l'infrastructure avec Terraform
+- [ ] Valider la configuration EKS créée par Terraform
+- [ ] Vérifier la création correcte des repositories ECR
+- [ ] Tester la connexion à EKS depuis votre machine locale
+- [ ] Valider les politiques IAM et les rôles créés
 
-## 13. Pipeline CI/CD
+## 14. Pipeline CI/CD
 
-- [ ] Mettre en place un pipeline CI/CD avec AWS CodePipeline
+- [ ] Mettre en place un pipeline CI/CD avec AWS CodePipeline ou GitHub Actions
   - [ ] Configurer la source (ex: GitHub)
   - [ ] Mettre en place le build avec AWS CodeBuild
     - [ ] Construire l'image Docker
     - [ ] Pousser l'image vers ECR
+  - [ ] Intégrer Terraform dans le pipeline
+    - [ ] Ajouter une étape pour `terraform plan`
+    - [ ] Ajouter une étape pour `terraform apply` (avec approbation manuelle si nécessaire)
   - [ ] Configurer le déploiement vers EKS avec Helm
     - [ ] Mettre à jour les valeurs du chart Helm
     - [ ] Exécuter `helm upgrade` ou `helm install`
 - [ ] Implémenter des tests post-déploiement
 - [ ] Configurer des notifications de statut de déploiement
+- [ ] Mettre en place des tests d'infrastructure avec Terraform
 
-## 14. Monitoring et Logging
+## 15. Monitoring et Logging
 
 - [ ] Configurer CloudWatch pour la collecte des logs
 - [ ] Mettre en place des métriques personnalisées dans CloudWatch
@@ -144,8 +170,9 @@
 - [ ] Implémenter un dashboard de monitoring
 - [ ] Intégrer Prometheus pour la collecte de métriques
 - [ ] Configurer Grafana pour la visualisation des métriques
+- [ ] Configurer Terraform pour provisionner les ressources de monitoring nécessaires
 
-## 15. Sécurité et Conformité
+## 16. Sécurité et Conformité
 
 - [ ] Configurer les groupes de sécurité AWS
 - [ ] Mettre en place le chiffrement des données au repos (EBS)
@@ -154,7 +181,7 @@
   - [ ] Implémenter la fonctionnalité de suppression des données utilisateur
   - [ ] Créer une politique de confidentialité
 
-## 16. Déploiement et Tests Finaux
+## 17. Déploiement et Tests Finaux
 
 - [ ] Effectuer un déploiement de test sur un environnement de staging avec Helm
 - [ ] Réaliser des tests de charge
@@ -162,10 +189,12 @@
 - [ ] Effectuer des tests de sécurité (pentest)
 - [ ] Tester le processus de rollback avec Helm
 
-## 17. Lancement et Maintenance
+## 18. Lancement et Maintenance
 
 - [ ] Planifier la stratégie de lancement
 - [ ] Préparer la documentation de support, incluant les instructions Helm
 - [ ] Mettre en place un système de feedback utilisateur
 - [ ] Planifier les mises à jour régulières et la maintenance
 - [ ] Établir une procédure de mise à jour utilisant Helm
+- [ ] Établir une procédure de mise à jour de l'infrastructure utilisant Terraform
+- [ ] Documenter le processus de gestion de l'infrastructure avec Terraform
