@@ -1,20 +1,30 @@
 use crate::{Context, Error};
 
+/// This help
 #[poise::command(prefix_command)]
 pub async fn help(
     ctx: Context<'_>,
-    #[description = "Specific command to show help about"]
-    #[autocomplete = "poise::builtins::autocomplete_command"]
-    command: Option<String>,
+    #[description = "Help command"] command: Option<String>,
 ) -> Result<(), Error> {
+    let config = poise::builtins::HelpConfiguration {
+        include_description: true,
+        ephemeral: true,
+        ..Default::default()
+    };
     poise::builtins::help(
         ctx,
         command.as_deref(),
-        poise::builtins::HelpConfiguration {
-            extra_text_at_bottom: "This is an example bot made to showcase features of my custom Discord bot framework",
-            ..Default::default()
-        },
+        config,
     ).await?;
-    ctx.send(poise::CreateReply::default().content("help me learning Rust !")).await?;
+    Ok(())
+}
+
+/// Ping me
+#[poise::command(prefix_command)]
+pub async fn ping(
+    ctx: Context<'_>,
+    #[description = "Ping me !"] _command: Option<String>
+) -> Result<(), Error> {
+    ctx.say("Pong !").await?;
     Ok(())
 }
