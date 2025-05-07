@@ -1,0 +1,34 @@
+---
+- name: Prepare Minikube and monitoring environment
+  hosts: localhost
+  tasks:
+    - name: Ensure Docker is running
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+      become: yes
+
+    - name: Ensure Minikube is running
+      command: minikube status
+      register: minikube_status
+      changed_when: false
+      failed_when: "'Running' not in minikube_status.stdout"
+
+    - name: Start Minikube if not running
+      command: minikube start --driver=docker
+      when: "'Running' not in minikube_status.stdout"
+
+    - name: Ensure Prometheus is running
+      systemd:
+        name: prometheus
+        state: started
+        enabled: yes
+      become: yes
+
+    - name: Ensure Grafana is running
+      systemd:
+        name: grafana-server
+        state: started
+        enabled: yes
+      become: yes
