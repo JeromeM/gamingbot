@@ -5,7 +5,7 @@ use log::{info, warn, error, debug};
 
 use chrono::Local;
 use std::process;
-use dotenv;
+use std::env;
 use std::io::Write;
 
 use poise::serenity_prelude as serenity;
@@ -60,17 +60,11 @@ async fn main() {
         })
         .init();
 
-    // No .env file found
-    if let Err(err) = dotenv::dotenv() {
-        error!("Error while loading .env file : {:?}", err);
-        process::exit(1);
-    }
-
     // Get Discord Token
-    match dotenv::var(S_DISCORD_TOKEN) {
+    match env::var(S_DISCORD_TOKEN) {
         Ok(val) => token = val,
         Err(err) => {
-            error!("Discord Token needed in .env file : {:?}", err);
+            error!("Discord Token needed : {:?}", err);
             process::exit(1);
         }
     }
