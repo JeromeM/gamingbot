@@ -62,6 +62,22 @@ pipeline {
                 sh 'ansible-playbook ansible/setup.yml'
             }
         }
+        stage('Monitoring') {
+            steps {
+                sh '''
+                    kubectl create namespace monitoring --dry-run=client -o yaml | kubectl apply -f -
+                    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+                    helm repo add grafana https://grafana.github.io/helm-charts
+                    helm repo update
+                    helm upgrade --install prometheus-stack prometheus-community/kube-prometheus-stack \
+                        --namespace monitoring \
+                        --set grafana.enabled=true \
+                        --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false \
+                        --create-namespace
+                    kubectl get crd servicemonitors.monitoring.coreos.com || { echo "ServiceMonitor CRD not found"; exit 1; }
+                '''
+            }
+        }
         stage('Deploy') {
             steps {
                 withVault(
@@ -80,21 +96,6 @@ pipeline {
                         sh 'terraform apply -auto-approve -var="discord_token=${DISCORD_TOKEN}"'
                     }
                 }
-            }
-        }
-        stage('Monitoring') {
-            steps {
-                sh '''
-                    kubectl create namespace monitoring --dry-run=client -o yaml | kubectl apply -f -
-                    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-                    helm repo add grafana https://grafana.github.io/helm-charts
-                    helm repo update
-                    helm install prometheus-stack prometheus-community/kube-prometheus-stack \
-                        --namespace monitoring \
-                        --set grafana.enabled=true \
-                        --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false \
-                        --create-namespace
-                '''
             }
         }
         stage('Verify') {
