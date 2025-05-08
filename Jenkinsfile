@@ -33,7 +33,12 @@ pipeline {
                     /var/lib/jenkins/.cargo/bin/cargo build --release
                     ls -l target/release/gaming_limousin || { echo "Binary gaming_limousin not found"; exit 1; }
                     docker build -t gamingbot:latest --no-cache .
-                    minikube status || minikube start --driver=docker --memory=4096 --cpus=2
+                    echo "Nettoyage de Minikube..."
+                    minikube stop || true
+                    minikube delete || true
+                    echo "Démarrage de Minikube..."
+                    minikube start --driver=docker --memory=6144 --cpus=4
+                    minikube status || { echo "Minikube failed to start"; exit 1; }
                     minikube ssh -- docker ps -a -q --filter "ancestor=gamingbot:latest" | xargs -r minikube ssh -- docker rm -f
                     minikube ssh -- docker rmi -f gamingbot:latest || true
                     minikube image load gamingbot:latest || { echo "Failed to load image into Minikube"; exit 1; }
