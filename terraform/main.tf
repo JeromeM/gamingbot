@@ -157,3 +157,48 @@ resource "kubernetes_service" "prometheus" {
     type = "ClusterIP"
   }
 }
+
+resource "kubernetes_service" "gamingbot" {
+  metadata {
+    name      = "gamingbot"
+    namespace = "gamingbot-namespace"
+  }
+  spec {
+    selector = {
+      app = "gamingbot"
+    }
+    port {
+      name        = "http"
+      port        = 8080
+      target_port = 8080
+    }
+  }
+}
+
+resource "kubernetes_manifest" "gamingbot_servicemonitor" {
+  manifest = {
+    apiVersion = "monitoring.coreos.com/v1"
+    kind       = "ServiceMonitor"
+    metadata = {
+      name      = "gamingbot-monitor"
+      namespace = "gamingbot-namespace"
+      labels = {
+        app = "gamingbot"
+      }
+    }
+    spec = {
+      selector = {
+        matchLabels = {
+          app = "gamingbot"
+        }
+      }
+      endpoints = [
+        {
+          port     = "http"
+          path     = "/metrics"
+          interval = "15s"
+        }
+      ]
+    }
+  }
+}
