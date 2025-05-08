@@ -2,6 +2,12 @@ provider "kubernetes" {
   config_path = "~/.kube/config"
 }
 
+variable "discord_token" {
+  description = "Discord bot token"
+  type        = string
+  sensitive   = true
+}
+
 resource "kubernetes_namespace" "gamingbot" {
   metadata {
     name = "gamingbot-namespace"
@@ -55,7 +61,7 @@ resource "kubernetes_secret" "bot_secrets" {
     namespace = kubernetes_namespace.gamingbot.metadata[0].name
   }
   data = {
-    discord_token = "placeholder" # Remplacé par Vault dans Jenkins
+    discord_token = var.discord_token
   }
 }
 
