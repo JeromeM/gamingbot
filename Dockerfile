@@ -15,5 +15,7 @@ RUN cargo build --release \
     && ls -l /app/target/release/gaming_limousin \
     || { echo "Binary gaming_limousin not found"; exit 1; }
 
+EXPOSE 8080
+
 # Vérifier que le binaire existe avant de démarrer
 CMD ["/app/target/release/gaming_limousin"]

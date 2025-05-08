@@ -11,20 +11,42 @@ use std::io::Write;
 use poise::serenity_prelude as serenity;
 use serenity::GatewayIntents;
 
+use prometheus::{Counter, TextEncoder, Encoder, Registry};
+use warp::Filter;
+
 use crate::commands::general::*;
 
 const S_DISCORD_TOKEN: &str = "DISCORD_TOKEN";
 const S_DISCORD_PREFIX: &str = "!";
 const S_CRATE_NAME: &str = env!("CARGO_PKG_NAME");
 
-// struct Handler;
-struct Data {} // User data, which is stored and accessible in all command invocations
+// User data, which is stored and accessible in all command invocations
+struct Data {
+    command_counter: Counter,
+}
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
 
+// Prometheus metrics
+lazy_static::lazy_static! {
+    static ref REGISTRY: Registry = Registry::new();
+    static ref COMMAND_COUNTER: Counter = Counter::new(
+        "discord_commands_total",
+        "Total number of Discord commands executed"
+    ).unwrap();
+}
+
+// Metrics endpoint
+async fn metrics_handler() -> Result<impl warp::Reply, warp::Rejection> {
+    let encoder = TextEncoder::new();
+    let metric_families = REGISTRY.gather();
+    let mut buffer = vec![];
+    encoder.encode(&metric_families, &mut buffer).unwrap();
+    Ok(warp::reply::with_header(buffer, "Content-Type", "text/plain; version=0.0.4"))
+}
+
 // Custom error handler
 async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
-
     match error {
         poise::FrameworkError::Setup {
             error, ..
@@ -32,7 +54,7 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
         poise::FrameworkError::Command {
             error, ctx, ..
         } => {
-            error!("Error in command `{}`: {:?}", ctx.command().name, error,);
+            error!("Error in command `{}`: {:?}", ctx.command().name, error);
         }
         error => {
             if let Err(e) = poise::builtins::on_error(error).await {
@@ -69,6 +91,13 @@ async fn main() {
         }
     }
 
+    // Register Prometheus metrics
+    REGISTRY.register(Box::new(COMMAND_COUNTER.clone())).unwrap();
+
+    // Start metrics server
+    let metrics_route = warp::path("metrics").and_then(metrics_handler);
+    tokio::spawn(warp::serve(metrics_route).run(([0, 0, 0, 0], 8080)));
+
     // Set gateway intents, which decides what events the bot will be notified about
     let intents = GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
 
@@ -92,24 +121,32 @@ async fn main() {
                 Ok(())
             })
         },
+        command_check: Some(|ctx| {
+            Box::pin(async move {
+                // Increment command counter for each command executed
+                ctx.data().command_counter.inc();
+                Ok(true)
+            })
+        }),
         ..Default::default()
     };
     let framework = poise::Framework::builder()
         .setup(move |ctx, _ready, framework| {
             Box::pin(async move {
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                Ok(Data {})
+                Ok(Data {
+                    command_counter: COMMAND_COUNTER.clone(),
+                })
             })
         })
         .options(options)
         .build();
 
     // Create client and add Event Handler
-    let client = serenity::ClientBuilder::new(&token, intents) 
+    let client = serenity::ClientBuilder::new(&token, intents)
         .framework(framework)
         .await;
 
     // Start the client
     client.unwrap().start().await.unwrap();
-
 }

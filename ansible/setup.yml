@@ -16,7 +16,7 @@
       failed_when: "'Running' not in minikube_status.stdout"
 
     - name: Start Minikube if not running
-      command: minikube start --driver=docker
+      command: minikube start --driver=docker -memory=4096 --cpus=2
       when: "'Running' not in minikube_status.stdout"
 
     - name: Ensure Prometheus is running

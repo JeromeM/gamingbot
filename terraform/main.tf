@@ -1,5 +1,5 @@
 provider "kubernetes" {
-  config_path = "~/.kube/config"
+  config_path = "/shared/kube/config"
 }
 
 variable "discord_token" {
@@ -155,5 +155,50 @@ resource "kubernetes_service" "prometheus" {
       target_port = 9090
     }
     type = "ClusterIP"
+  }
+}
+
+resource "kubernetes_service" "gamingbot" {
+  metadata {
+    name      = "gamingbot"
+    namespace = "gamingbot-namespace"
+  }
+  spec {
+    selector = {
+      app = "gamingbot"
+    }
+    port {
+      name        = "http"
+      port        = 8080
+      target_port = 8080
+    }
+  }
+}
+
+resource "kubernetes_manifest" "gamingbot_servicemonitor" {
+  manifest = {
+    apiVersion = "monitoring.coreos.com/v1"
+    kind       = "ServiceMonitor"
+    metadata = {
+      name      = "gamingbot-monitor"
+      namespace = "gamingbot-namespace"
+      labels = {
+        app = "gamingbot"
+      }
+    }
+    spec = {
+      selector = {
+        matchLabels = {
+          app = "gamingbot"
+        }
+      }
+      endpoints = [
+        {
+          port     = "http"
+          path     = "/metrics"
+          interval = "15s"
+        }
+      ]
+    }
   }
 }
