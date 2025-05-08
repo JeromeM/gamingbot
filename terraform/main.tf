@@ -1,5 +1,5 @@
 provider "kubernetes" {
-  config_path = "~/.kube/config"
+  config_path = "/shared/kube/config"
 }
 
 variable "discord_token" {
