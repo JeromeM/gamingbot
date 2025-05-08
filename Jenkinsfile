@@ -10,15 +10,15 @@ pipeline {
         stage('Setup') {
             steps {
                 sh '''
-                    # Vérifier si cargo est installé
+                    echo "Vérification de l'environnement..."
+                    echo "PATH actuel : $PATH"
                     if ! /var/lib/jenkins/.cargo/bin/cargo --version >/dev/null 2>&1; then
-                        echo "Cargo non trouvé, installation de Rust..."
-                        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
-                        export PATH="$HOME/.cargo/bin:$PATH"
+                        echo "Erreur : cargo non trouvé à /var/lib/jenkins/.cargo/bin/cargo"
+                        exit 1
                     else
-                        echo "Cargo déjà installé."
+                        echo "Cargo trouvé."
+                        /var/lib/jenkins/.cargo/bin/cargo --version
                     fi
-                    /var/lib/jenkins/.cargo/bin/cargo --version
                 '''
             }
         }
