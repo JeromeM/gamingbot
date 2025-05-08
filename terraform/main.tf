@@ -14,7 +14,7 @@ resource "kubernetes_deployment" "bot" {
     namespace = kubernetes_namespace.gamingbot.metadata[0].name
   }
   spec {
-    replicas = 2
+    replicas = 1
     selector {
       match_labels = {
         app = "gamingbot"

@@ -7,6 +7,17 @@ pipeline {
         githubPush()
     }
     stages {
+        stage('Setup') {
+            steps {
+                sh '''
+                    # Installer Rust si cargo n'est pas trouvé
+                    if ! /var/lib/jenkins/.cargo/bin/cargo --version >/dev/null 2>&1; then
+                        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+                    fi
+                    /var/lib/jenkins/.cargo/bin/cargo --version
+                '''
+            }
+        }
         stage('Checkout') {
             steps {
                 git branch: 'master', url: 'https://github.com/JeromeM/gamingbot.git'
@@ -14,11 +25,11 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh 'cargo build --release'
-                sh 'ls -l target/release/gaming_limousin || { echo "Binary gaming_limousin not found"; exit 1; }'
-                sh 'docker build -t gamingbot:latest --no-cache .'
-                sh 'minikube status || minikube start --driver=docker --memory=4096 --cpus=2'
                 sh '''
+                    /var/lib/jenkins/.cargo/bin/cargo build --release
+                    ls -l target/release/gaming_limousin || { echo "Binary gaming_limousin not found"; exit 1; }
+                    docker build -t gamingbot:latest --no-cache .
+                    minikube status || minikube start --driver=docker --memory=4096 --cpus=2
                     minikube ssh -- docker ps -a -q --filter "ancestor=gamingbot:latest" | xargs -r minikube ssh -- docker rm -f
                     minikube ssh -- docker rmi -f gamingbot:latest || true
                     minikube image load gamingbot:latest || { echo "Failed to load image into Minikube"; exit 1; }
@@ -28,8 +39,10 @@ pipeline {
         }
         stage('Test') {
             steps {
-                sh 'cargo test'
-                sh 'trivy image --exit-code 1 gamingbot:latest'
+                sh '''
+                    /var/lib/jenkins/.cargo/bin/cargo test
+                    trivy image --exit-code 1 gamingbot:latest
+                '''
             }
         }
         stage('Configure') {
