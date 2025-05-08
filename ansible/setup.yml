@@ -14,12 +14,10 @@
       register: minikube_status
       changed_when: false
       failed_when: "'Running' not in minikube_status.stdout"
-      become: yes
 
     - name: Start Minikube if not running
-      command: MINIKUBE_HOME=/shared/minikube minikube start --driver=docker -memory=4096 --cpus=2
+      command: minikube start --driver=docker -memory=4096 --cpus=2
       when: "'Running' not in minikube_status.stdout"
-      become: yes
 
     - name: Ensure Prometheus is running
       systemd:
