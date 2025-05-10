@@ -84,12 +84,12 @@
 
 ## 10. Dockerisation
 
-- [ ] Créer un Dockerfile pour le bot
-  - [ ] Choisir une image de base appropriée
-  - [ ] Configurer les étapes de build
-  - [ ] Optimiser la taille de l'image
-- [ ] Créer un docker-compose.yml pour le développement local
-- [ ] Tester le build et l'exécution du conteneur Docker
+- [X] Créer un Dockerfile pour le bot
+  - [X] Choisir une image de base appropriée
+  - [X] Configurer les étapes de build
+  - [X] Optimiser la taille de l'image
+- [X] Créer un docker-compose.yml pour le développement local
+- [X] Tester le build et l'exécution du conteneur Docker
 
 ## 11. Infrastructure as Code avec Terraform
 
