@@ -57,7 +57,7 @@ USER appuser
 
 # Définir les variables d'environnement pour Vault (valeurs par défaut)
 ENV VAULT_ADDR="http://127.0.0.1:8200"
-ENV VAULT_TOKEN=""
+ENV VAULT_TOKEN="${{ secrets.VAULT_TOKEN }}"
 ENV RUST_LOG=info
 
 # Utiliser le script d'entrée
