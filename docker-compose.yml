@@ -33,7 +33,7 @@ services:
       - vault-network
 
   gamingbot:
-    build: .
+    image: grommey87/gamingbot:latest
     env_file:
       - .env
     environment:
