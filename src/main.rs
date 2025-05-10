@@ -90,16 +90,18 @@ async fn main() {
             process::exit(1);
         }
     }
+    info!("Using Discord token: {} (length: {})", token, token.len());
 
     // Register Prometheus metrics
     REGISTRY.register(Box::new(COMMAND_COUNTER.clone())).unwrap();
 
     // Start metrics server
     let metrics_route = warp::path("metrics").and_then(metrics_handler);
-    tokio::spawn(warp::serve(metrics_route).run(([0, 0, 0, 0], 8080)));
+    tokio::spawn(warp::serve(metrics_route).run(([0, 0, 0, 0], 8091)));
 
     // Set gateway intents, which decides what events the bot will be notified about
     let intents = GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
+    info!("Configuring client with intents: {:?}", intents);
 
     // Build Framework
     let options = poise::FrameworkOptions {

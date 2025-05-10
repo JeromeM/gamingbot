@@ -1,0 +1,45 @@
+services:
+  vault:
+    image: hashicorp/vault:latest
+    ports:
+      - "8200:8200"
+    environment:
+      - VAULT_DEV_ROOT_TOKEN_ID=${{ secrets.VAULT_TOKEN }}
+      - VAULT_ADDR=http://0.0.0.0:8200
+      - VAULT_API_ADDR=http://0.0.0.0:8200
+    volumes:
+      - ./scripts/vault-start.sh:/vault-start.sh:ro
+    entrypoint: ["/bin/sh", "/vault-start.sh"]
+    cap_add:
+      - IPC_LOCK
+    networks:
+      - vault-network
+    healthcheck:
+      test: ["NONE"]
+
+  vault-init:
+    image: hashicorp/vault:latest
+    volumes:
+      - ./scripts/vault-init.sh:/vault-init.sh:ro
+    command: ["/bin/sh", "/vault-init.sh"]
+    depends_on:
+      vault:
+        condition: service_started
+    networks:
+      - vault-network
+
+  gamingbot:
+    image: grommey87/gamingbot:latest
+    environment:
+      - VAULT_ADDR=http://vault:8200
+      - VAULT_TOKEN=${{ secrets.VAULT_TOKEN }}
+      - RUST_LOG=debug
+    depends_on:
+      vault-init:
+        condition: service_completed_successfully
+    networks:
+      - vault-network
+
+networks:
+  vault-network:
+    driver: bridge
