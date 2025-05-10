@@ -22,8 +22,8 @@ echo "Vault est prêt !"
 
 # Stocker le token Discord dans Vault
 echo "Envoi de la requête POST pour stocker le token Discord..."
-wget -q -S --post-data="{\"data\": {\"discord_token\": \"$DISCORD_TOKEN\"}}" \
-  --header="X-Vault-Token: $VAULT_TOKEN" \
+wget -q -S --post-data="{\"data\": {\"discord_token\": \"${{ secrets.DISCORD_TOKEN }}\"}}" \
+  --header="X-Vault-Token: ${{ secrets.VAULT_TOKEN }}" \
   -O response.txt http://vault:8200/v1/secret/data/gamingbot 2> headers.txt
 
 # Extraire le code HTTP depuis headers.txt
